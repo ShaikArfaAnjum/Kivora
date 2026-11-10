@@ -1,126 +1,257 @@
-# Kivora — AI Content Creator Marketplace
-> **ByteXL HacXLerate 2026 Hackathon | Kampus.VC Problem Statement**  
-> *Phase 0: Problem Understanding, Data Design, and Connected Demo Data Foundation*
+# Kivora — AI-Powered Content Creator Marketplace
+
+**Connecting AI creators, brands and creative agencies through smart discovery, transparent workflows and voice-first assistance.**
+
+> Built for **The Great Indian Internship Challenge by Gnani**
+
+![Kivora landing page](docs/screenshots/landing.png)
 
 ---
 
-## 🌟 Executive Summary
+## About Kivora
 
-**Kivora** is an AI-native creative marketplace designed to eliminate the trust deficit in generative production. Unlike traditional freelance platforms, Kivora evaluates creators through **reproducible multi-step production pipelines**, **audited evidence artifacts** (ComfyUI node graphs, intermediate passes, camera trajectory logs), and **commercial IP compliance**, paired with an **AI-Assisted Brief Builder** and an **explainable matching engine**.
+Generative AI has changed how creative work is made. Creators now produce AI videos, digital fashion, 3D product visuals and cinematic content. But brands still find it hard to pick the right AI creator for a project.
+
+Regular freelance sites are not built to judge AI-made work. Brands cannot easily see which tools a creator used, how the work was produced, or whether the creator can deliver what a campaign needs.
+
+**Kivora fixes this.** Creators show their work and their process. Brands post clear campaign briefs, find the right creators and manage the whole collaboration in one place. A multilingual voice assistant, powered by Gnani AI, makes the platform easy to use in Telugu, Hindi and English.
 
 ---
 
-## 📁 Repository Structure (Phase 0)
+## The Problem
 
+- **Finding creators:** Brands cannot easily find creators with the exact AI tools and skills they need.
+- **Weak portfolios:** Most portfolios show only the final output, not how it was made.
+- **Unclear workflows:** It is hard to know which tools and steps were used to make an asset.
+- **Messy briefs:** Brands often struggle to turn an idea into a clear, structured brief.
+- **Scattered collaboration:** Applications, invitations, deliverables, revisions and approvals live in different tools.
+- **Trust:** Brands need proof of what a creator can really do.
+- **Language barrier:** Many creators and small brands are more comfortable in their own language than in English.
+
+---
+
+## Our Solution
+
+Kivora gives creators and brands their own dedicated experience on one platform.
+
+### For AI content creators
+- Build a professional profile and portfolio
+- Show AI tools, skills and specializations
+- Share production workflows and supporting evidence
+- Find relevant campaigns and apply with proposals
+- Receive invitations and manage engagements
+- Submit deliverables and handle revisions and approvals
+
+### For brands and agencies
+- Create a brand profile
+- Build campaign briefs with AI help
+- Publish requirements and creative specifications
+- Search and filter creators, and get matched suggestions
+- Review portfolios, skills and workflow evidence
+- Review applications, send invitations and manage milestones
+- Review deliverables and approve work
+
+---
+
+## Key Features
+
+### Voice Assistant with Gnani AI
+Kivo can be used by voice as well as by text. Users speak in Telugu, Hindi or English and hear the answer spoken back.
+
+| Step | Technology |
+|---|---|
+| Speech to text | Gnani Prisma |
+| Reasoning | Google Gemini with Kivora platform knowledge |
+| Text to speech | Gnani Timbre |
+
+```text
+User speech -> Gnani Prisma -> Kivo chat flow -> Gemini -> Gnani Timbre -> Spoken reply
 ```
+
+The text chat stays available next to the voice assistant. Language support depends on the verified capabilities of the Gnani models.
+
+### Kivo, the AI Assistant
+Kivo answers questions about the platform and helps with AI-assisted tasks. It uses Gemini for reasoning along with Kivora's own platform knowledge.
+
+### Brand Portal
+
+1. **Brand dashboard and profile:** A central place to manage the company profile and see key numbers such as total briefs, pitches received, active collaborations and completed work. Recent creator proposals and their status show up here too.
+2. **Campaign creation with the AI Brief Builder:** Brands define objectives, target audience, timeline, required skills and preferred AI tools. The AI Brief Builder turns a rough idea into a structured brief, and the brand can review and edit it before going ahead.
+3. **Save draft and publish:** A brief can be saved as a draft and changed later, then published when it is ready.
+4. **Creator discovery and filters:** Brands search for creators and narrow the results by category, skills, AI tools, budget, location and verification status. Opening a creator profile shows their specializations and creative skills.
+5. **Pitch proposals:** When creators apply to a published campaign, their proposals appear in the brand portal. Brands can review the pitch, proposed budget, timeline and how well the creator fits the campaign.
+6. **Collaboration workspace:** Once a creator is selected, the workspace helps manage the project. Brands track progress, give feedback and review the final work for approval.
+
+### Creator Portal
+
+1. **Creator dashboard:** One workspace to manage the profile, show work, find campaigns and handle collaborations.
+2. **Profile management:** Creators update their specializations and creative skills so brands understand their experience.
+3. **Portfolio management:** Creators showcase their creative projects.
+4. **Discover campaign briefs and filters:** Creators browse published briefs from brands and find the ones that match their specialization.
+5. **Smart opportunities:** Kivora suggests campaigns that match a creator's skills, portfolio and creative interests.
+6. **Saved briefs:** Creators save briefs to come back to later.
+7. **AI-assisted pitch and applications:** Creators send a proposal that explains their approach, what they will deliver, their budget and their timeline. Under My Applications they can track the status of every pitch.
+8. **Direct invitations:** Brands that like a creator's work can invite them directly.
+9. **Notifications and direct chat:** Creators and brands talk through notifications and direct messages, so creators stay updated on decisions, invitations and collaboration changes.
+10. **Deliverables and revisions:** After a proposal is accepted, creators submit deliverables, receive feedback and track progress until the brand approves the final work.
+11. **Verification and proofs:** Creators add supporting evidence and workflow proofs. This helps brands understand the creator's process and trust their portfolio claims. An admin reviewer can verify and audit this evidence.
+
+### Smart Matching
+Creators are matched to campaigns using skills, AI tools, content specializations, portfolio relevance, technical requirements and budget fit.
+
+---
+
+## How It Works
+
+1. **Join:** Creators and brands sign up, with email, Google or GitHub.
+2. **Build a profile:** Creators add portfolios, tools and skills. Brands add their profile and needs.
+3. **Create campaigns:** Brands publish structured briefs, with AI help from the brief builder.
+4. **Discover:** Brands search and match with creators and review their work.
+5. **Collaborate:** Creators apply, brands invite, and engagements begin.
+6. **Produce:** Both sides work through milestones, deliverables, revisions and approvals.
+7. **Ask Kivo:** Users get help by text or voice at any point.
+
+---
+
+## Screenshots
+
+| Landing page | Sign in |
+|---|---|
+| ![Landing](docs/screenshots/landing.png) | ![Sign in](docs/screenshots/login.png) |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React, Vite |
+| Backend | Python, FastAPI |
+| Database | SQLite with SQLAlchemy ORM |
+| API | REST |
+| AI reasoning | Google Gemini |
+| Speech to text | Gnani Prisma |
+| Text to speech | Gnani Timbre |
+| Authentication | Email, Google and GitHub sign-in, with role-based access |
+| Deployment | Render (`render.yaml`) |
+
+---
+
+## AI Architecture
+
+AI supports selected workflows. It does not replace the core marketplace logic.
+
+- The React frontend handles all user interaction.
+- The FastAPI backend handles application logic and API requests.
+- Gemini powers the AI-assisted workflows and Kivo's answers.
+- Kivora's knowledge resources keep Kivo's answers about the platform accurate.
+- Gnani Prisma and Timbre add voice input and output on top of the same Kivo chat flow.
+
+---
+
+## Project Structure
+
+```text
 Kivora/
-├── README.md                                 # Overview, setup, and inspection guide
-├── kivora.db                                 # Seeded SQLite relational database
+├── backend/
+│   ├── app/
+│   ├── scripts/
+│   └── ...
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   └── ...
 ├── docs/
-│   └── PHASE_0_PLANNING_AND_SPECIFICATION.md # Full 10-section architecture & specification
-└── backend/
-    ├── app/
-    │   ├── __init__.py
-    │   ├── database.py                       # SQLAlchemy 2.0 engine & session factory
-    │   ├── models/
-    │   │   ├── __init__.py
-    │   │   └── models.py                     # Normalized relational models
-    │   └── data/
-    │       └── seed_data.json                # Reproducible seed dataset
-    └── scripts/
-        ├── __init__.py
-        ├── generate_seed_json.py             # Seed dataset generator script
-        ├── seed_db.py                        # Database loader & table builder
-        └── validate_seed.py                  # Foreign key auditor & scenario validator
+│   └── screenshots/
+├── .env.example
+├── .gitignore
+├── render.yaml
+├── run.py
+└── README.md
 ```
 
----
-
-## 📊 Connected Seed Dataset Highlights
-
-The seeded data (`backend/app/data/seed_data.json` & `kivora.db`) is strictly normalized and cross-referenced:
-
-| Entity | Count | Highlights / Scope |
-| :--- | :---: | :--- |
-| **Users** | 20 | 14 Creators + 6 Brands with distinct authentication records |
-| **Creator Profiles** | 14 | Spans Filmmaking, 3D Product Viz, Anime, High-Fashion, CGI Automotive, Concept Art, Audio-Visuals |
-| **Brand Profiles** | 6 | Luxury Cosmetics, EV Automotive, AAA/Indie Gaming, Digital Fashion, FinTech, Bio-Wellness |
-| **Skills Catalog** | 12 | LoRA Character Consistency, 4K Upscaling, Camera Control, Fluid Dynamics, etc. |
-| **Tools Catalog** | 12 | Runway Gen-3, Midjourney v6, ComfyUI, Flux.1 Pro, Kling 1.5, Magnific AI, ElevenLabs, etc. |
-| **Creator Skills & Tools** | 84 | Links with skill proficiencies and verified vs. self-declared status flags |
-| **Campaign Briefs** | 9 | Varied aspect ratios (16:9, 9:16, 1:1), 4K video specs, commercial rights, budgets ($1.5k–$6.5k) |
-| **Portfolio Projects** | 6 | Detailed deep-dives with aspect ratios, resolutions, and licensing tiers |
-| **Workflow Steps** | 14 | Sequential production pipelines (Prompting $\rightarrow$ ControlNet $\rightarrow$ Motion $\rightarrow$ Upscaling) |
-| **Evidence & Verifications**| 14 | ComfyUI node graphs, process screenshots, prompt logs, with reviewer audit notes |
-| **Applications** | 6 | Real pitches connected to live briefs with attached portfolio pieces |
-| **Engagements** | 3 | Active production pipelines (`KICKOFF`, `DRAFT_SUBMITTED`, `FINAL_APPROVED`) |
+This is a short overview. See the repository for the full structure.
 
 ---
 
-## 🚀 Quickstart & Verification
+## Getting Started
 
-### 1. Prerequisites
+### Prerequisites
 - Python 3.10+
-- SQLAlchemy, Pydantic
+- Node.js and npm
+- Git
 
-### 2. Inspect Seed Data
-The complete dataset is formatted in human-readable JSON:
+### 1. Clone the repository
 ```bash
-cat backend/app/data/seed_data.json
+git clone https://github.com/ShaikArfaAnjum/Kivora.git
+cd Kivora
 ```
 
-### 3. Re-seed the Database (Idempotent)
-Drops and regenerates all relational tables in `kivora.db`:
+### 2. Set up environment variables
+Create a backend `.env` file from `.env.example` and add the keys the app needs (Gemini and Gnani credentials). Keep all AI keys on the backend only, and never commit real keys.
+
+### 3. Start the backend
+Install the backend dependencies from the project's dependency file, then start FastAPI. API docs are available at the backend `/docs` endpoint.
+
+### 4. Start the frontend
 ```bash
-python backend/scripts/seed_db.py
+cd frontend
+npm install
+npm run dev
 ```
 
-### 4. Run Automated Validation & Filter Scenarios
-Validates SQLite foreign key integrity and runs 6 evaluation scenarios:
-```bash
-python backend/scripts/validate_seed.py
-```
+### 5. Open the app
+Open the URL shown in your terminal.
 
-### 5. Run FastAPI Endpoint Integration Audit
-Tests all REST endpoints, filter parameters, explainable matching, and the AI brief builder:
-```bash
-python backend/scripts/test_api_endpoints.py
-```
-
-### 6. Run Real Users, Authentication & Persistence Verification Suite
-Tests the complete real-user lifecycle from registration, email OTP verification, profile creation, portfolio authoring, brief creation, application submission, acceptance, logout/re-login persistence, and security/unauthorized access checks:
-```bash
-python backend/scripts/test_real_users_persistence.py
-```
-
-### 7. Start the FastAPI Development Server
-```bash
-uvicorn backend.app.main:app --reload --port 8000
-```
-Interactive API documentation will be available at: `http://localhost:8000/docs`
+> Check `frontend/package.json` and the backend config for the exact scripts and ports.
 
 ---
 
-## 🔐 Real Users, Authentication & Data Persistence
+## Demo Access
 
-Kivora is built from the ground up for **real, live users** with complete database persistence:
-- **Password Security:** Passwords are never stored in plain text. Salted **bcrypt** (12 rounds) hashes protect all credentials.
-- **Email OTP Verification:** Real registration dispatches a 6-digit OTP stored in the `otp_codes` table with a 15-minute expiration. Integrates **Resend** for live transactional emails with an automated fallback for offline judging.
-- **Stateless JWT Tokens:** Authentication returns signed PyJWT tokens with user ID and role claims (`CREATOR`, `BRAND`, `ADMIN`).
-- **Role-Based Access Control (RBAC):** Only `CREATOR` users can set up creator profiles or submit pitches. Only `BRAND` users can author briefs and review/accept applications.
-- **Non-Destructive Seeding:** Database seeding is completely idempotent. Existing real user profiles, portfolios, briefs, and applications are preserved and never erased or overwritten during re-seeding. Demo users are provisioned with real bcrypt hashes (`Password123!`) so evaluators can inspect existing demo workflows immediately.
+The login page has one-click demo accounts with seed data, so you can try each role quickly:
 
-### Validation Scenarios Tested:
-1. **Strong Match:** Elena Rostova (`creator-elena-rostova`) on Lumina Skincare 4K Video brief (16:9, Runway Gen-3 verified, within budget).
-2. **Partial Match:** Marcus Vance (`creator-marcus-vance`) matches budget and aesthetic but lacks required video motion generation.
-3. **Hard Filter Exclusion:** Kai Tanaka (`creator-kai-tanaka`) fails hard requirement on 4K fluid video synthesis.
-4. **Legitimate Zero-Result Search:** Querying for an incompatible combination (e.g., 1:1 Audio-Visual video under $200) cleanly returns 0 results.
-5. **Commercial License Diversity:** Verifies distinct licensing tiers (`Full Commercial Buyout`, `Worldwide Perpetual`, `Non-Exclusive Digital Rights`).
-6. **Verification Spectrum:** Proves distinction between self-declared tools (13 claims) and evidence-audited tools (30 claims with reviewer notes).
+| Role | Demo account |
+|---|---|
+| Creator | Aanya Sharma, a sci-fi AI director |
+| Brand | Lumina Skincare, a luxury cosmetics brand |
+| Admin | Lead Reviewer, handles verification and audits |
 
 ---
 
-## 📑 Documentation Links
-- Detailed Specification: [`docs/PHASE_0_PLANNING_AND_SPECIFICATION.md`](file:///c:/Users/muska/OneDrive/Desktop/Kivora/docs/PHASE_0_PLANNING_AND_SPECIFICATION.md)
-- Data Models: [`backend/app/models/models.py`](file:///c:/Users/muska/OneDrive/Desktop/Kivora/backend/app/models/models.py)
-- Seed Loader: [`backend/scripts/seed_db.py`](file:///c:/Users/muska/OneDrive/Desktop/Kivora/backend/scripts/seed_db.py)
+## Security and Data Handling
+
+- Protected user authentication
+- Role-based access control
+- Server-side validation
+- Credentials managed through environment variables
+- Private user data kept protected
+
+API keys are never exposed in frontend code or committed to the repository.
+
+---
+
+## Future Roadmap
+
+- Wider multilingual voice support across the whole platform
+- Better creator verification and workflow evidence analysis
+- Smarter AI creator matching
+- Secure brand-to-creator payments with escrow milestones
+- Campaign performance insights
+- AI-suggested creator teams
+- Campaign simulation and optimization
+
+---
+
+## Vision
+
+We believe the future of creative work will be collaborative, AI-assisted and open to everyone, in every language.
+
+**Discover talent. Showcase creativity. Build together.**
+
+---
+
+## Links
+
+- GitHub: https://github.com/ShaikArfaAnjum/Kivora
+- Built for: The Great Indian Internship Challenge by Gnani
