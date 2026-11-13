@@ -84,40 +84,23 @@ However, traditional freelance sites (Upwork, Fiverr) fail because they are not 
 
 ---
 
-## 🚀 Core Features & Role Portals
+## 🚀 Core Features & Marketplace Portals
 
-```mermaid
-graph LR
-    subgraph Brand ["🏢 Brand Portal"]
-        B1["Post Campaign Brief"] --> B2["AI Brief Builder"]
-        B2 --> B3["Explore Creators"]
-        B3 --> B4["Accept Pitch & Escrow"]
-    end
+<div align="center">
 
-    subgraph AI ["🧠 Kivora Intelligence"]
-        AI1["Explainable Matching Engine"]
-        AI2["Gemini 3.8 Flash Reasoning"]
-        AI3["Kivora Knowledge Base"]
-        AI4["Gnani Voice Engine (In Progress)"]
-    end
+### 🎨 Verified Creator Community & Portfolios
+*Audited generative AI directors, 3D artists, and VFX creators with transparent tool stacks.*
 
-    subgraph Creator ["🎨 Creator Portal"]
-        C1["Portfolio & Tool Stack"] --> C2["Submit Evidence Artifacts"]
-        C2 --> C3["AI Proposal Pitch Assistant"]
-        C3 --> C4["Deliver Final 4K Outputs"]
-    end
+![Verified Creators Showcase](./docs/screenshots/kivora_verified_creators.jpg)
 
-    subgraph Admin ["🛡️ Admin Verification Desk"]
-        A1["Audit ComfyUI Node Graphs"] --> A2["Verify Tool Claims"]
-        A2 --> A3["Grant VERIFIED_PRO Badge"]
-    end
+<br/>
 
-    B2 -.-> AI2
-    B3 <--> AI1 <--> C1
-    C3 -.-> AI2
-    C2 --> A1
-    B4 <==> C4
-```
+### 🏢 Featured Brands & Active Commercial Briefs
+*Enterprise brands and creative studios launching production briefs on Kivora.*
+
+![Featured Brands Showcase](./docs/screenshots/kivora_featured_brands.jpg)
+
+</div>
 
 ### 1. 🎨 Creator Portal
 * **Verified Portfolio Deep-Dives:** Display high-resolution outputs with technical metadata (Aspect Ratio, Resolution, Tools Used, Licensing Tiers).
