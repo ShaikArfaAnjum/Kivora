@@ -2,10 +2,41 @@
  * Central API Client configuration for Kivora Frontend
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+/**
+ * Central API Client configuration for Kivora Frontend
+ */
+
+const LIVE_RENDER_API = 'https://kivora-api-jffe.onrender.com';
+
+function resolveApiBaseUrl() {
+  const envUrl = (import.meta.env.VITE_API_URL || '').trim();
+
+  // If envUrl points to the dead/old n7m1 endpoint, override to the live jffe backend
+  if (envUrl.includes('kivora-api-n7m1')) {
+    return LIVE_RENDER_API;
+  }
+
+  if (envUrl) {
+    return envUrl;
+  }
+
+  // Auto-detect based on current browser host
+  if (typeof window !== 'undefined' && window.location) {
+    const host = window.location.hostname || '';
+    if (host.includes('onrender.com')) {
+      return LIVE_RENDER_API;
+    }
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return ''; // Relative /api proxied by Vite dev server
+    }
+  }
+
+  return LIVE_RENDER_API;
+}
 
 export async function fetchApi(endpoint, options = {}) {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const baseUrl = resolveApiBaseUrl();
+  const url = `${baseUrl}${endpoint}`;
   const token = localStorage.getItem('kivora_token');
 
   const headers = {
@@ -33,28 +64,34 @@ export async function fetchApi(endpoint, options = {}) {
     }
     return response.json();
   } catch (err) {
-    // If relative fetch failed, try direct localhost:8000 fallback in dev mode
-    if (!API_BASE_URL && url.startsWith('/api')) {
-      try {
-        const fallbackUrl = `http://localhost:8000${endpoint}`;
-        const response = await fetch(fallbackUrl, config);
-        if (response.ok) {
-          return response.json();
-        }
-      } catch {
-        // Localhost:8000 unavailable, try deployed backend fallback
-      }
+    // If the primary fetch failed (network error, failed proxy, or dead host), attempt fallback
+    const fallbackUrls = [];
 
+    // 1. If we didn't try LIVE_RENDER_API, try LIVE_RENDER_API
+    if (!url.startsWith(LIVE_RENDER_API)) {
+      fallbackUrls.push(`${LIVE_RENDER_API}${endpoint}`);
+    }
+
+    // 2. If running locally and didn't try localhost:8000 directly
+    if (
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+      !url.startsWith('http://localhost:8000')
+    ) {
+      fallbackUrls.push(`http://localhost:8000${endpoint}`);
+    }
+
+    for (const fbUrl of fallbackUrls) {
       try {
-        const prodFallbackUrl = `https://kivora-api-jffe.onrender.com${endpoint}`;
-        const prodResponse = await fetch(prodFallbackUrl, config);
-        if (prodResponse.ok) {
-          return prodResponse.json();
+        const fbResponse = await fetch(fbUrl, config);
+        if (fbResponse.ok) {
+          return fbResponse.json();
         }
       } catch {
-        // Both local and fallback failed
+        // Continue to next fallback
       }
     }
+
     throw err;
   }
 }
