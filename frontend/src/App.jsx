@@ -5,6 +5,12 @@ import LandingLoginSection from './components/LandingLoginSection';
 import PortfolioSpotlight from './components/PortfolioSpotlight';
 import HowItWorksSection from './components/HowItWorksSection';
 import CreativeUniverseSection from './components/CreativeUniverseSection';
+import VerifiedCreatorsSection from './components/VerifiedCreatorsSection';
+import CreativeDomainsSection from './components/CreativeDomainsSection';
+import FeaturedBrandsConveyor from './components/FeaturedBrandsConveyor';
+import MeetKivoSection from './components/MeetKivoSection';
+import FloatingKivoChatbot from './components/FloatingKivoChatbot';
+import CosmicFooter from './components/CosmicFooter';
 import CreatorDiscovery from './components/CreatorDiscovery';
 import BriefsExplorer from './components/BriefsExplorer';
 import PortfolioModal from './components/PortfolioModal';
@@ -199,6 +205,28 @@ export default function App() {
     const unsubscribe = addAuthListener((user) => {
       setCurrentUser(user);
     });
+
+    // Check for incoming OAuth token callback
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const oauthToken = searchParams.get('oauth_token');
+      if (oauthToken) {
+        authService.handleOAuthToken(oauthToken).then((u) => {
+          if (u) {
+            handleAuthSuccess(u);
+            searchParams.delete('oauth_token');
+            searchParams.delete('email');
+            searchParams.delete('role');
+            const newSearch = searchParams.toString();
+            const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : '') + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+          }
+        });
+      }
+    } catch (e) {
+      console.error('Error handling OAuth callback:', e);
+    }
+
     if (window.location.pathname === '/login' || window.location.hash === '#login') {
       setIsAuthModalOpen(true);
     }
@@ -283,29 +311,31 @@ export default function App() {
   return (
     <div className="app-wrapper font-sans">
       {/* Top Navigation */}
-      <Navbar
-        currentView={currentView}
-        onNavigate={handleNavigate}
-        currentUser={currentUser}
-        onOpenAuth={() => setIsAuthModalOpen(true)}
-        onLogout={handleLogout}
-        onOpenAiBuilder={() => setIsAiBuilderOpen(true)}
-        onOpenAdminDesk={() => {
-          if (currentUser?.role === 'ADMIN') {
-            handleNavigate('admin');
-          } else {
-            setIsAdminDeskOpen(true);
-          }
-        }}
-      />
+      {(!currentUser || (currentView !== 'dashboard' && currentView !== 'admin')) && (
+        <Navbar
+          currentView={currentView}
+          onNavigate={handleNavigate}
+          currentUser={currentUser}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+          onLogout={handleLogout}
+          onOpenAiBuilder={() => setIsAiBuilderOpen(true)}
+          onOpenAdminDesk={() => {
+            if (currentUser?.role === 'ADMIN') {
+              handleNavigate('admin');
+            } else {
+              setIsAdminDeskOpen(true);
+            }
+          }}
+        />
+      )}
 
       {/* Main Content Area */}
       <main className="main-content">
         <ErrorBoundary>
-        {/* VIEW 1: PUBLIC LANDING PAGE */}
+        {/* VIEW 1: PUBLIC LANDING PAGE (EXACT REFERENCE 9 SECTIONS) */}
         {currentView === 'landing' && (
           <div className="landing-page-flow">
-            {/* Hero Section with Cosmic Artwork & Interactive Constellation */}
+            {/* Section 1: Cosmic Hero with 3D Portal and Interactive Constellation */}
             <HeroSection
               onExploreCreators={() => handleNavigate('creators')}
               onExploreBriefs={() => handleNavigate('briefs')}
@@ -317,7 +347,7 @@ export default function App() {
               onOpenAiBuilder={() => setIsAiBuilderOpen(true)}
             />
 
-            {/* Dedicated Login Section with Rotating Creative Quotations */}
+            {/* Section 2: Introduction & 3D Glass Authentication Card */}
             <LandingLoginSection
               currentUser={currentUser}
               onOpenAuth={() => setIsAuthModalOpen(true)}
@@ -332,30 +362,34 @@ export default function App() {
               onLogout={handleLogout}
             />
 
-            {/* Curated 6 Portfolios Showcase with Video Previews */}
-            <PortfolioSpotlight
+            {/* Section 3: Verified 3D Creators Showcase with Hover Tilt */}
+            <VerifiedCreatorsSection
+              onSelectCreator={handleSelectCreator}
               onSelectProject={(project) => setSelectedProject(project)}
+              onNavigateCreators={() => handleNavigate('creators')}
             />
 
-            {/* How Kivora Works (4 Glass Step Cards) */}
+            {/* Section 4: Creative Domains 12-Card Grid */}
+            <CreativeDomainsSection
+              onSelectDomain={() => handleNavigate('creators')}
+              onNavigateCreators={() => handleNavigate('creators')}
+            />
+
+            {/* Section 5: Featured Brands Smooth Infinite Conveyor */}
+            <FeaturedBrandsConveyor
+              onExploreBriefs={() => handleNavigate('briefs')}
+            />
+
+            {/* Section 6: How Kivora Works (4 Connected Steps) */}
             <HowItWorksSection
               onExplore={() => handleNavigate('creators')}
               onPostBrief={() => setIsAiBuilderOpen(true)}
             />
 
-            {/* Featured Creators Discovery */}
-            <section className="container" style={{ padding: '4rem 2rem' }}>
-              <CreatorDiscovery
-                onSelectCreator={handleSelectCreator}
-                onSelectProject={(project) => setSelectedProject(project)}
-                onOpenChat={handleOpenChat}
-              />
-            </section>
-
-            {/* Creative Universe Section */}
-            <CreativeUniverseSection
-              onNavigateCreators={() => handleNavigate('creators')}
-              onNavigateBriefs={() => handleNavigate('briefs')}
+            {/* Section 7: Meet Kivo (3D Robot Mascot & Interactive Chat Preview) */}
+            <MeetKivoSection
+              onOpenAiBuilder={() => setIsAiBuilderOpen(true)}
+              onExploreCreators={() => handleNavigate('creators')}
               onOpenAuth={() => setIsAuthModalOpen(true)}
             />
           </div>
@@ -424,6 +458,7 @@ export default function App() {
                 onSelectProject={(proj) => setSelectedProject(proj)}
                 onSelectBrief={(b) => setSelectedBrief(b)}
                 onLogout={handleLogout}
+                onNavigateHome={() => handleNavigate('landing')}
                 initialTab={dashboardTab}
                 initialConversationId={activeConversationId}
                 chatContext={chatContext}
@@ -438,6 +473,7 @@ export default function App() {
                 onSelectProject={(proj) => setSelectedProject(proj)}
                 onSelectBrief={(b) => setSelectedBrief(b)}
                 onLogout={handleLogout}
+                onNavigateHome={() => handleNavigate('landing')}
                 initialTab={dashboardTab}
                 initialConversationId={activeConversationId}
                 chatContext={chatContext}
@@ -570,40 +606,22 @@ export default function App() {
         />
       )}
 
-      {/* Editorial Luxury Footer */}
-      <footer className="footer-kivora-editorial">
-        <div className="container footer-inner">
-          <div>
-            <div className="footer-brand">
-              Kivora<span className="serif-italic-accent">.</span>
-            </div>
-            <p className="footer-sub">
-              A creative marketplace connecting premier brands with verified AI creators.
-            </p>
-          </div>
+      {/* Editorial Luxury Cosmic Footer */}
+      {(!currentUser || (currentView !== 'dashboard' && currentView !== 'admin')) && (
+        <CosmicFooter
+          onNavigate={handleNavigate}
+          onOpenAdminDesk={() => {
+            if (currentUser?.role === 'ADMIN') {
+              handleNavigate('admin');
+            } else {
+              setIsAdminDeskOpen(true);
+            }
+          }}
+        />
+      )}
 
-          <div className="footer-meta">
-            <div>
-              <span className="footer-status-dot" />
-              API Online • FastAPI & SQLite Connected
-            </div>
-            <span>•</span>
-            <button
-              type="button"
-              className="link-arrow-btn"
-              onClick={() => {
-                if (currentUser?.role === 'ADMIN') {
-                  handleNavigate('admin');
-                } else {
-                  setIsAdminDeskOpen(true);
-                }
-              }}
-            >
-              Admin Audit Desk
-            </button>
-          </div>
-        </div>
-      </footer>
+      {/* Floating Kivo AI Chatbot Trigger & Panel */}
+      <FloatingKivoChatbot />
     </div>
   );
 }

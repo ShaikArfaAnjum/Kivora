@@ -28,6 +28,7 @@ from backend.app.schemas.schemas import (
     VerificationRequestCreate,
     VerificationReviewRequest,
     AIEvidenceAnalysisRead,
+    InconsistencyFlag,
 )
 from backend.app.core.deps import require_role, get_current_verified_user
 from backend.app.services.verification_analyzer import analyze_and_persist_verification
@@ -40,13 +41,25 @@ router = APIRouter(prefix="/api/verification", tags=["Verification"])
 def format_ai_analysis(a: Optional[VerificationAiAnalysis]) -> Optional[AIEvidenceAnalysisRead]:
     if not a:
         return None
+
+    inconsistencies = []
+    for item in (a.potential_inconsistencies or []):
+        if isinstance(item, InconsistencyFlag):
+            inconsistencies.append(item)
+        elif isinstance(item, dict):
+            reason = item.get("reason") or item.get("issue") or item.get("flag") or "Flagged inconsistency"
+            supp = item.get("supporting_info") or item.get("details") or item.get("frame_range") or "Template match detected"
+            inconsistencies.append(InconsistencyFlag(reason=str(reason), supporting_info=str(supp)))
+        elif isinstance(item, str):
+            inconsistencies.append(InconsistencyFlag(reason=item, supporting_info="Analysis observation"))
+
     return AIEvidenceAnalysisRead(
         id=a.id,
         verification_id=a.verification_id,
         summary=a.summary,
         evidence_items_detected=a.evidence_items_detected or [],
         missing_evidence=a.missing_evidence or [],
-        potential_inconsistencies=a.potential_inconsistencies or [],
+        potential_inconsistencies=inconsistencies,
         limitations=a.limitations or [],
         analysis_status=a.analysis_status,
         disclaimer=a.disclaimer,

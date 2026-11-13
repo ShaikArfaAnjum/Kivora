@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import { getCurrentUser } from '../services/authService';
 import CategoryCard from './CategoryCard';
 import BriefCard from './BriefCard';
+import { resolveBriefDomain, CATEGORY_SLUG_TO_DOMAIN } from '../utils/briefImageMap';
 
 export default function BriefsExplorer({
   onSelectBrief,
@@ -159,10 +160,14 @@ export default function BriefsExplorer({
           );
         });
 
-        const textCorpus = `${b.title} ${b.creative_style_mood} ${b.campaign_objective} ${b.content_type}`.toLowerCase();
-        const hasTextCat = textCorpus.includes(catName) || textCorpus.includes(catSlug.replace('-', ' '));
+        const targetDomain = CATEGORY_SLUG_TO_DOMAIN[catSlug];
+        const briefDomain = resolveBriefDomain(b);
+        const hasDomainMatch = Boolean(targetDomain && briefDomain === targetDomain);
 
-        if (!hasRelationalCat && !hasTextCat) return false;
+        const textCorpus = `${b.title} ${b.creative_style_mood} ${b.campaign_objective} ${b.content_type}`.toLowerCase();
+        const hasTextCat = textCorpus.includes(catName) || textCorpus.includes(catSlug.replace(/-/g, ' '));
+
+        if (!hasRelationalCat && !hasDomainMatch && !hasTextCat) return false;
 
         // Subcategory check
         if (selectedSubcategory) {
@@ -170,7 +175,7 @@ export default function BriefsExplorer({
           const hasSub = briefCats.some(
             (bc) => (bc.slug || '').toLowerCase() === subSlug || (bc.name || '').toLowerCase() === subSlug
           );
-          if (!hasSub && !textCorpus.includes(subSlug.replace('-', ' '))) return false;
+          if (!hasSub && !textCorpus.includes(subSlug.replace(/-/g, ' '))) return false;
         }
       }
 

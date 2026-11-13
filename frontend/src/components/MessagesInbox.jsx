@@ -7,6 +7,7 @@ import {
   formatConversationListItemTime,
 } from '../utils/dateUtils';
 import { getCreatorAvatar } from '../utils/visualAssetHelpers';
+import { useVoiceRecorder } from '../utils/useVoiceRecorder';
 import BrandLogo from './BrandLogo';
 
 function sortMessagesChronologically(msgs) {
@@ -347,6 +348,40 @@ export default function MessagesInbox({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const [isTranscribingVoice, setIsTranscribingVoice] = useState(false);
+  const {
+    isRecording: isDictating,
+    duration: dictationDuration,
+    startRecording: startDictation,
+    stopRecording: stopDictation,
+  } = useVoiceRecorder();
+
+  const handleToggleVoiceDictation = async () => {
+    if (isDictating) {
+      setIsTranscribingVoice(true);
+      try {
+        const { file } = await stopDictation();
+        const formData = new FormData();
+        formData.append('audio_file', file);
+        formData.append('language_code', 'en-IN');
+        const res = await api.transcribeAudio(formData);
+        if (res && res.transcript) {
+          setMessageText((prev) => (prev ? `${prev} ${res.transcript}` : res.transcript));
+        }
+      } catch (err) {
+        console.error('Dictation transcription error:', err);
+      } finally {
+        setIsTranscribingVoice(false);
+      }
+    } else {
+      try {
+        await startDictation();
+      } catch (err) {
+        console.error('Failed to start dictation:', err);
+      }
+    }
+  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -740,19 +775,41 @@ export default function MessagesInbox({
                 type="text"
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
-                placeholder="Type your message..."
+                placeholder={isDictating ? `Listening... (${dictationDuration}s)` : isTranscribingVoice ? "Transcribing speech..." : "Type your message..."}
                 maxLength={5000}
-                disabled={isSending}
+                disabled={isSending || isTranscribingVoice}
                 style={{
                   flex: 1,
                   padding: '12px 18px',
                   borderRadius: '12px',
-                  border: '1px solid #D6D0C4',
+                  border: isDictating ? '1px solid #EF4444' : '1px solid #D6D0C4',
                   fontSize: '14px',
                   outline: 'none',
-                  backgroundColor: '#FAF8F5',
+                  backgroundColor: isDictating ? '#FEF2F2' : '#FAF8F5',
                 }}
               />
+              <button
+                type="button"
+                onClick={handleToggleVoiceDictation}
+                disabled={isSending || isTranscribingVoice}
+                title={isDictating ? 'Finish dictating voice message' : 'Dictate message with Gnani Prisma'}
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: isDictating ? '1px solid #DC2626' : '1px solid #D6D0C4',
+                  backgroundColor: isDictating ? '#EF4444' : '#FAF8F5',
+                  color: isDictating ? '#FFFFFF' : '#4B5563',
+                  cursor: isSending || isTranscribingVoice ? 'not-allowed' : 'pointer',
+                  fontSize: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontWeight: '600',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {isDictating ? `⏹ Done` : isTranscribingVoice ? '⏳' : '🎙️'}
+              </button>
               <button
                 type="submit"
                 disabled={!messageText.trim() || isSending}

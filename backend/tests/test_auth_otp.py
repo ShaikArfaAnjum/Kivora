@@ -116,6 +116,7 @@ def test_attempt_limit(db_session, mock_smtp_env, monkeypatch):
 
 def test_missing_smtp_raises(monkeypatch):
     import backend.app.services.email_service as email_service
+    monkeypatch.setenv("KIVORA_ENV", "production")
     monkeypatch.setattr(email_service, "SMTP_USER", "")
     from backend.app.services.email_service import send_otp_email
     with pytest.raises(ValueError, match="Missing required SMTP configuration"):

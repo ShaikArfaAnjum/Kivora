@@ -265,8 +265,17 @@ def list_creators(
             matched.sort(key=lambda c: c.verified_claims_count, reverse=True)
         else:
             matched.sort(key=lambda c: (c.average_rating, c.verified_claims_count), reverse=True)
-    else:
-        matched.sort(key=lambda c: (c.average_rating, c.verified_claims_count), reverse=True)
+    # If category filter is applied, prioritize primary domain specialists first
+    if category:
+        cat_k = category.lower().strip()
+        def is_primary_cat(cr):
+            return any(
+                cc.is_primary and (
+                    (cc.category and (cc.category.slug.lower() == cat_k or cc.category.name.lower() == cat_k))
+                    or cc.category_id.lower() == cat_k
+                ) for cc in (cr.categories or [])
+            ) or (cat_k in (cr.primary_specialization or '').lower() or cat_k.replace('-', ' ') in (cr.primary_specialization or '').lower())
+        matched.sort(key=lambda c: (1 if is_primary_cat(c) else 0, c.average_rating, c.verified_claims_count), reverse=True)
 
     # Pagination
     if page is not None and limit is not None:

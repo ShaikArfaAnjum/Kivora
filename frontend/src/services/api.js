@@ -132,6 +132,44 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
+  // --- Media & Assets ---
+  uploadMedia: (file, category = 'briefs') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('category', category);
+    return fetchApi('/api/media/upload', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
+  kivoChat: (payload) =>
+    fetchApi('/api/ai/kivo-chat', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  // --- Voice Services (Gnani AI Prisma STT & Timbre TTS) ---
+  getVoiceConfig: () => fetchApi('/api/voice/config'),
+
+  transcribeAudio: (formData) =>
+    fetchApi('/api/voice/transcribe', {
+      method: 'POST',
+      body: formData,
+    }),
+
+  synthesizeSpeech: (payload) =>
+    fetchApi('/api/voice/synthesize', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  kivoVoiceChat: (formData) =>
+    fetchApi('/api/voice/kivo-voice-chat', {
+      method: 'POST',
+      body: formData,
+    }),
+
   // --- Brands ---
   getBrands: () => fetchApi('/api/brands'),
   getMyBrandProfile: () => fetchApi('/api/brands/me'),
@@ -572,6 +610,11 @@ export const api = {
     const qs = query.toString();
     return fetchApi(`/api/workspaces/history/creator${qs ? `?${qs}` : ''}`);
   },
+  changePassword: (payload) =>
+    fetchApi('/api/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 };
 
 export default api;

@@ -133,7 +133,7 @@ export default function CreatorDiscovery({ onSelectCreator, onInviteCreator, onO
 
   // Composite multi-filter working in unison with actual creator data
   const filteredCreators = useMemo(() => {
-    return allCreators.filter((c) => {
+    const list = allCreators.filter((c) => {
       // Exclude test accounts from public creator discovery
       const isTestUser = (
         c.handle?.toLowerCase().startsWith('test_') ||
@@ -149,7 +149,31 @@ export default function CreatorDiscovery({ onSelectCreator, onInviteCreator, onO
         const catName = selectedCategory.name.toLowerCase();
         const creatorCats = c.categories || [];
 
-        const hasRelationalCategory = creatorCats.some((cc) => {
+        // Check if primary specialization or primary category matches
+        const primaryCat = creatorCats.find((cc) => cc.is_primary);
+        const isPrimaryRelational = primaryCat && (
+          (primaryCat.slug || '').toLowerCase() === catSlug ||
+          (primaryCat.name || '').toLowerCase() === catName
+        );
+
+        const specText = (c.primary_specialization || '').toLowerCase();
+        const isPrimarySpec = specText.includes(catName) || specText.includes(catSlug.replace(/-/g, ' '));
+        const isPrimaryMatch = Boolean(isPrimaryRelational || isPrimarySpec);
+
+        // Keywords from discipline and taxonomy words
+        const disciplineKeywords = DISCIPLINE_KEYWORDS[selectedCategory.name] || [];
+        const nameWords = catName.split(/[ &,-]+/).map(w => w.toLowerCase()).filter((w) => w.length > 2);
+        const allKeywords = [...new Set([...disciplineKeywords, ...nameWords, catSlug.replace(/-/g, ' ')])];
+
+        const bioText = (c.bio || '').toLowerCase();
+        const skillsText = (c.skills || []).map((s) => (s.name || '').toLowerCase()).join(' ');
+        const creatorCorpus = `${specText} ${bioText} ${skillsText}`;
+
+        const hasKeywordMatch = allKeywords.some((kw) => creatorCorpus.includes(kw));
+        const hasTextCategory = creatorCorpus.includes(catName);
+
+        // Secondary category check: requires verified keyword/skill relevance to avoid false matches
+        const hasSecondaryRelational = creatorCats.some((cc) => {
           const s = (cc.slug || '').toLowerCase();
           const n = (cc.name || '').toLowerCase();
           return (
@@ -161,11 +185,7 @@ export default function CreatorDiscovery({ onSelectCreator, onInviteCreator, onO
           );
         });
 
-        const specText = (c.primary_specialization || '').toLowerCase();
-        const bioText = (c.bio || '').toLowerCase();
-        const hasTextCategory = specText.includes(catName) || bioText.includes(catName);
-
-        if (!hasRelationalCategory && !hasTextCategory) {
+        if (!isPrimaryMatch && !(hasSecondaryRelational && (hasKeywordMatch || hasTextCategory))) {
           return false;
         }
 
@@ -175,7 +195,8 @@ export default function CreatorDiscovery({ onSelectCreator, onInviteCreator, onO
           const hasSub = creatorCats.some(
             (cc) => (cc.slug || '').toLowerCase() === subSlug || (cc.name || '').toLowerCase() === subSlug
           );
-          if (!hasSub) return false;
+          const hasSubText = creatorCorpus.includes(subSlug.replace(/-/g, ' '));
+          if (!hasSub && !hasSubText) return false;
         }
       }
 
@@ -242,6 +263,23 @@ export default function CreatorDiscovery({ onSelectCreator, onInviteCreator, onO
 
       return true;
     });
+
+    // If a category is selected, sort primary specialists first, then by rating
+    if (selectedCategory) {
+      const catSlug = selectedCategory.slug.toLowerCase();
+      const catName = selectedCategory.name.toLowerCase();
+      list.sort((a, b) => {
+        const aPrimary = (a.categories || []).some(cc => cc.is_primary && (cc.slug?.toLowerCase() === catSlug || cc.name?.toLowerCase() === catName)) ||
+          (a.primary_specialization || '').toLowerCase().includes(catName);
+        const bPrimary = (b.categories || []).some(cc => cc.is_primary && (cc.slug?.toLowerCase() === catSlug || cc.name?.toLowerCase() === catName)) ||
+          (b.primary_specialization || '').toLowerCase().includes(catName);
+        if (aPrimary && !bPrimary) return -1;
+        if (!aPrimary && bPrimary) return 1;
+        return (b.average_rating || 0) - (a.average_rating || 0);
+      });
+    }
+
+    return list;
   }, [allCreators, selectedCategory, selectedSubcategory, searchQuery, selectedDisciplines, selectedTools, selectedTiers, locationQuery, maxBudget]);
 
   const hasActiveFilters =

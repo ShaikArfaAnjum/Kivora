@@ -682,6 +682,8 @@ def format_application_read(app: Application) -> ApplicationRead:
         submitted_at=app.submitted_at,
         reviewed_at=app.reviewed_at,
         brand_feedback=app.brand_feedback,
+        brief_title=app.brief.title if (app.brief and app.brief.title) else None,
+        brand_name=app.brief.brand.company_name if (app.brief and app.brief.brand and app.brief.brand.company_name) else None,
     )
 
 

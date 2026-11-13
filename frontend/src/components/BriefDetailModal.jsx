@@ -52,6 +52,13 @@ export default function BriefDetailModal({ brief, onClose, onSelectCreator, curr
       .then((res) => {
         if (!isCancelled && res) {
           setContextualStatus(res);
+          if (['PENDING', 'SUBMITTED', 'UNDER_REVIEW', 'SHORTLISTED'].includes(res.application_status) || res.required_action === 'PENDING_ACCEPTANCE') {
+            setChatIneligibleNotice({
+              reason: 'Your chat will be enabled once the brand accepts your pitch.',
+              requiredAction: 'PENDING_ACCEPTANCE',
+              applicationStatus: res.application_status || 'PENDING',
+            });
+          }
         }
       })
       .catch(() => null);
@@ -203,9 +210,16 @@ export default function BriefDetailModal({ brief, onClose, onSelectCreator, curr
         attached_project_ids: [],
       });
       setApplySuccess(true);
+      setChatIneligibleNotice({
+        reason: 'Your chat will be enabled once the brand accepts your pitch.',
+        requiredAction: 'PENDING_ACCEPTANCE',
+        applicationStatus: 'SUBMITTED',
+      });
       // Refresh contextual status
       api.getContextualConversation({ brief_id: brief.id })
-        .then((res) => setContextualStatus(res))
+        .then((res) => {
+          if (res) setContextualStatus(res);
+        })
         .catch(() => null);
     } catch (err) {
       setApplyError(err.message || 'Failed to submit application.');
@@ -253,6 +267,27 @@ export default function BriefDetailModal({ brief, onClose, onSelectCreator, curr
       refUrl.endsWith('.txt'));
   const displayVisualUrl = getBriefCoverImage(brief);
 
+  const isAccepted = contextualStatus?.status === 'found';
+  const pendingStatuses = ['PENDING', 'SUBMITTED', 'UNDER_REVIEW', 'SHORTLISTED'];
+  const isPending =
+    !isAccepted &&
+    Boolean(
+      pendingStatuses.includes(contextualStatus?.application_status) ||
+      contextualStatus?.required_action === 'PENDING_ACCEPTANCE' ||
+      chatIneligibleNotice?.requiredAction === 'PENDING_ACCEPTANCE' ||
+      pendingStatuses.includes(chatIneligibleNotice?.applicationStatus) ||
+      applySuccess ||
+      brief?.user_has_applied
+    );
+  const isInvited =
+    !isAccepted &&
+    Boolean(
+      contextualStatus?.invitation_id ||
+      contextualStatus?.required_action === 'ACCEPT_INVITATION' ||
+      chatIneligibleNotice?.invitationId ||
+      chatIneligibleNotice?.requiredAction === 'ACCEPT_INVITATION'
+    );
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-container brief-modal glass-panel" onClick={(e) => e.stopPropagation()}>
@@ -292,25 +327,41 @@ export default function BriefDetailModal({ brief, onClose, onSelectCreator, curr
                 id="btn-chat-with-brand"
                 className="btn-chat-with-brand"
                 onClick={handleChatWithBrand}
-                disabled={isCheckingChat || isAcceptingInvite}
+                disabled={!isAccepted || isCheckingChat || isAcceptingInvite}
+                title={
+                  isAccepted
+                    ? `Chat with ${brandName}`
+                    : isPending
+                    ? 'Your chat will be enabled once the brand accepts your pitch.'
+                    : 'Submit a pitch to activate chat.'
+                }
                 style={{
-                  backgroundColor: '#7952EC',
-                  color: '#FFFFFF',
-                  border: 'none',
+                  backgroundColor: isAccepted ? '#7952EC' : '#F3F4F6',
+                  color: isAccepted ? '#FFFFFF' : '#6B7280',
+                  border: isAccepted ? 'none' : '1px solid #D1D5DB',
                   borderRadius: '10px',
                   padding: '9px 18px',
                   fontSize: '13px',
                   fontWeight: '700',
-                  cursor: isCheckingChat ? 'wait' : 'pointer',
+                  cursor: isAccepted ? 'pointer' : 'not-allowed',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  boxShadow: '0 2px 6px rgba(121, 82, 236, 0.25)',
+                  boxShadow: isAccepted ? '0 2px 6px rgba(121, 82, 236, 0.25)' : 'none',
                   transition: 'all 0.15s ease',
+                  opacity: isAccepted ? 1 : 0.85,
                 }}
               >
-                <span>💬</span>
-                <span>{isCheckingChat ? 'Opening Discussion...' : `Chat with ${brandName}`}</span>
+                <span>{isAccepted ? '💬' : '🔒'}</span>
+                <span>
+                  {isCheckingChat
+                    ? 'Checking Status...'
+                    : isAccepted
+                    ? `Chat with ${brandName}`
+                    : isPending
+                    ? `Chat Locked (Pitch Pending)`
+                    : `Chat with ${brandName}`}
+                </span>
               </button>
 
               {/* Save Brief Button */}
@@ -380,7 +431,7 @@ export default function BriefDetailModal({ brief, onClose, onSelectCreator, curr
                   <span>✓</span>
                   <span>Active Collaboration Thread</span>
                 </span>
-              ) : contextualStatus?.application_status === 'PENDING' ? (
+              ) : (contextualStatus?.application_status === 'PENDING' || isPending) ? (
                 <span
                   style={{
                     padding: '8px 14px',
@@ -452,10 +503,14 @@ export default function BriefDetailModal({ brief, onClose, onSelectCreator, curr
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: '240px' }}>
               <span style={{ fontSize: '16px' }}>🔒</span>
-              <span style={{ lineHeight: 1.4, fontWeight: '500' }}>{chatIneligibleNotice.reason}</span>
+              <span style={{ lineHeight: 1.4, fontWeight: '500' }}>
+                {isPending
+                  ? 'Your chat will be enabled once the brand accepts your pitch.'
+                  : chatIneligibleNotice.reason}
+              </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {chatIneligibleNotice.invitationId || chatIneligibleNotice.requiredAction === 'ACCEPT_INVITATION' ? (
+              {isInvited ? (
                 <button
                   type="button"
                   onClick={() =>
@@ -477,6 +532,23 @@ export default function BriefDetailModal({ brief, onClose, onSelectCreator, curr
                 >
                   {isAcceptingInvite ? 'Accepting...' : 'Accept Invitation & Unlock Chat 🚀'}
                 </button>
+              ) : isPending ? (
+                <span
+                  style={{
+                    backgroundColor: '#EDE9FE',
+                    color: '#6D28D9',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <span>⏳</span>
+                  <span>Pitch Under Review</span>
+                </span>
               ) : (
                 <button
                   type="button"
@@ -535,25 +607,33 @@ export default function BriefDetailModal({ brief, onClose, onSelectCreator, curr
                     type="button"
                     className="btn-chat-with-brand"
                     onClick={handleChatWithBrand}
-                    disabled={isCheckingChat}
+                    disabled={!isAccepted || isCheckingChat}
+                    title={
+                      isAccepted
+                        ? `Chat with ${brandName}`
+                        : isPending
+                        ? 'Your chat will be enabled once the brand accepts your pitch.'
+                        : 'Submit a pitch to activate chat.'
+                    }
                     style={{
                       marginTop: '4px',
-                      backgroundColor: '#FAF8F5',
-                      color: '#7952EC',
-                      border: '1.5px solid #7952EC',
+                      backgroundColor: isAccepted ? '#FAF8F5' : '#F3F4F6',
+                      color: isAccepted ? '#7952EC' : '#6B7280',
+                      border: isAccepted ? '1.5px solid #7952EC' : '1px solid #D1D5DB',
                       borderRadius: '8px',
                       padding: '6px 12px',
                       fontSize: '12px',
                       fontWeight: '700',
-                      cursor: isCheckingChat ? 'wait' : 'pointer',
+                      cursor: isAccepted ? 'pointer' : 'not-allowed',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '6px',
                       alignSelf: 'flex-start',
                       transition: 'all 0.15s ease',
+                      opacity: isAccepted ? 1 : 0.85,
                     }}
                   >
-                    {isCheckingChat ? 'Opening...' : `💬 Chat with ${brandName}`}
+                    {isCheckingChat ? 'Opening...' : isAccepted ? `💬 Chat with ${brandName}` : `🔒 Chat with ${brandName}`}
                   </button>
                 )}
               </div>
@@ -644,11 +724,11 @@ export default function BriefDetailModal({ brief, onClose, onSelectCreator, curr
             ) : isCreatorUser ? (
               <div className="application-section glass-panel">
                 <h4>SUBMIT APPLICATION PITCH</h4>
-                {applySuccess ? (
+                {applySuccess || isPending ? (
                   <div className="alert-success" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div>✓ Application pitch successfully submitted to brand! Engagement pending review.</div>
+                    <div style={{ fontWeight: '700' }}>✓ Application pitch submitted! Your chat will be enabled once the brand accepts your pitch.</div>
                     <div style={{ fontSize: '12px', color: '#047857', lineHeight: 1.5 }}>
-                      Once {brandName} reviews and accepts your proposal, direct messaging will unlock automatically.
+                      Your pitch is currently under review by {brandName}. Once accepted, direct messaging will unlock automatically.
                     </div>
                   </div>
                 ) : (
@@ -698,9 +778,17 @@ export default function BriefDetailModal({ brief, onClose, onSelectCreator, curr
                           type="button"
                           className="btn-chat-pill"
                           onClick={handleChatWithBrand}
-                          disabled={isCheckingChat}
+                          disabled={!isAccepted || isCheckingChat}
+                          title={
+                            isAccepted
+                              ? `Chat with ${brandName}`
+                              : isPending
+                              ? 'Your chat will be enabled once the brand accepts your pitch.'
+                              : 'Submit a pitch to activate chat.'
+                          }
+                          style={!isAccepted ? { opacity: 0.65, cursor: 'not-allowed' } : {}}
                         >
-                          💬 Chat with Brand
+                          {isAccepted ? `💬 Chat with Brand` : `🔒 Chat Locked`}
                         </button>
                         <button type="submit" className="btn btn-dark btn-sm" disabled={submittingApply}>
                           {submittingApply ? 'Submitting...' : 'Submit Pitch →'}

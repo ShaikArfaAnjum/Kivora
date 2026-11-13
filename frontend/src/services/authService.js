@@ -88,6 +88,24 @@ export const authService = {
     });
   },
 
+  forgotPassword: async (email) => {
+    return fetchApi('/api/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  resetPassword: async (email, otpCode, newPassword) => {
+    return fetchApi('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        otp_code: otpCode,
+        new_password: newPassword,
+      }),
+    });
+  },
+
   getMe: async () => {
     const user = await fetchApi('/api/auth/me');
     if (user) {
@@ -105,6 +123,37 @@ export const authService = {
 
   getStoredUser: () => {
     return getCurrentUser();
+  },
+
+  getOAuthStatus: async () => {
+    return fetchApi('/api/auth/oauth/status').catch(() => ({
+      google: { configured: false },
+      github: { configured: false },
+    }));
+  },
+
+  getOAuthAuthorizeUrl: async (provider, role = 'CREATOR') => {
+    return fetchApi(`/api/auth/oauth/${provider}/authorize?role=${role}`);
+  },
+
+  handleOAuthToken: async (token) => {
+    if (!token) return null;
+    localStorage.setItem('kivora_token', token);
+    const user = await fetchApi('/api/auth/me');
+    if (user) {
+      localStorage.setItem('kivora_user', JSON.stringify(user));
+      notifyAuthListeners(user);
+    }
+    return user;
+  },
+  changePassword: async (currentPassword, newPassword) => {
+    return fetchApi('/api/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
+    });
   },
 };
 

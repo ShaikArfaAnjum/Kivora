@@ -35,6 +35,16 @@ class ResendOtpRequest(BaseModel):
     email: str = Field(..., pattern=EMAIL_PATTERN)
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: str = Field(..., pattern=EMAIL_PATTERN)
+
+
+class ResetPasswordRequest(BaseModel):
+    email: str = Field(..., pattern=EMAIL_PATTERN)
+    otp_code: str = Field(..., min_length=6, max_length=6)
+    new_password: str = Field(..., min_length=8)
+
+
 class UserSummaryResponse(BaseModel):
     id: str
     email: str
@@ -570,6 +580,8 @@ class ApplicationRead(BaseModel):
     submitted_at: datetime
     reviewed_at: Optional[datetime] = None
     brand_feedback: Optional[str] = None
+    brief_title: Optional[str] = None
+    brand_name: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -1174,6 +1186,63 @@ class ReviewSummaryRead(BaseModel):
     timeliness_avg: Optional[float] = None
     rating_distribution: dict
     recent_reviews: List[ReviewRead] = []
+
+
+class KivoChatMessage(BaseModel):
+    sender: str
+    text: str
+
+
+class KivoChatRequest(BaseModel):
+    message: str
+    history: List[KivoChatMessage] = []
+    user_role: Optional[str] = None
+
+
+class KivoChatResponse(BaseModel):
+    reply: str
+    suggestions: List[str] = []
+    generation_engine: str = "GEMINI"
+
+
+class VoiceLanguageItem(BaseModel):
+    code: str
+    name: str
+
+
+class VoiceConfigResponse(BaseModel):
+    languages: List[VoiceLanguageItem]
+    default_language: str = "en-IN"
+    default_voice: str = "Shivani"
+    voices: List[str] = []
+    is_configured: bool = False
+
+
+class SpeechTranscriptionResponse(BaseModel):
+    success: bool = True
+    transcript: str
+    detected_language_code: str = "en-IN"
+    model: str = "prisma-v3.0"
+    latency: Optional[float] = None
+
+
+class TextToSpeechRequest(BaseModel):
+    text: str
+    language_code: Optional[str] = "en-IN"
+    voice: Optional[str] = "Shivani"
+    speed: Optional[float] = 1.0
+
+
+class KivoVoiceChatResponse(BaseModel):
+    transcript: str
+    reply: str
+    audio_base64: Optional[str] = None
+    audio_format: Optional[str] = "audio/wav"
+    suggestions: List[str] = []
+    generation_engine: str = "GEMINI"
+    language_code: str = "en-IN"
+    tts_error: Optional[str] = None
+
 
 
 

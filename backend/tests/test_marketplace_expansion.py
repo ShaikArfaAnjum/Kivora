@@ -22,11 +22,16 @@ from backend.app.models.models import (
 )
 from backend.app.core.security import create_access_token
 
+import pytest
 client = TestClient(app)
 
-
-
-
+@pytest.fixture
+def db_session():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 def test_01_categories_load_with_actual_counts():
     """1. Category cards load from backend with actual creator & brief counts."""
