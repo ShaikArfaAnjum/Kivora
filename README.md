@@ -134,7 +134,7 @@ Gemini serves as Kivora's primary reasoning engine across the platform:
 * **Creative Deliverable Evaluation:** Evaluates uploaded deliverables against brief guidelines.
 * **Kivo AI Concierge:** Real-time conversational co-pilot grounded in `backend/app/data/kivora_knowledge_base.json`.
 
-### 🎙️ Gnani AI Voice Integration *(In Progress)*
+### 🎙️ Gnani AI Voice Integration.
 We are actively integrating **Gnani AI voice capabilities** into Kivo AI to enable hands-free voice interactions:
 * **Gnani Prisma STT (`prisma-v3.0`):** Speech-to-Text transcription with verified low-latency performance across **English (`en-IN`)**, **Hindi (`hi-IN`)**, and **Telugu (`te-IN`)**.
 * **Gnani Timbre TTS (`timbre-v3.0`):** Natural spoken speech synthesis with expressive vocal delivery (Default voice: `Shivani`).
