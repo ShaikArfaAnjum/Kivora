@@ -34,6 +34,22 @@ function resolveApiBaseUrl() {
   return LIVE_RENDER_API;
 }
 
+async function fetchWithTimeout(url, config, timeoutMs = 25000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      ...config,
+      signal: config.signal || controller.signal,
+    });
+    clearTimeout(id);
+    return response;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+}
+
 export async function fetchApi(endpoint, options = {}) {
   const baseUrl = resolveApiBaseUrl();
   const url = `${baseUrl}${endpoint}`;
@@ -51,7 +67,7 @@ export async function fetchApi(endpoint, options = {}) {
   };
 
   try {
-    const response = await fetch(url, config);
+    const response = await fetchWithTimeout(url, config, 25000);
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
       let message = errorBody.detail || `HTTP Error ${response.status}: ${response.statusText}`;
@@ -64,7 +80,7 @@ export async function fetchApi(endpoint, options = {}) {
     }
     return response.json();
   } catch (err) {
-    // If the primary fetch failed (network error, failed proxy, or dead host), attempt fallback
+    // If the primary fetch failed (network error, timeout, failed proxy, or dead host), attempt fallback
     const fallbackUrls = [];
 
     // 1. If we didn't try LIVE_RENDER_API, try LIVE_RENDER_API
@@ -83,7 +99,7 @@ export async function fetchApi(endpoint, options = {}) {
 
     for (const fbUrl of fallbackUrls) {
       try {
-        const fbResponse = await fetch(fbUrl, config);
+        const fbResponse = await fetchWithTimeout(fbUrl, config, 20000);
         if (fbResponse.ok) {
           return fbResponse.json();
         }

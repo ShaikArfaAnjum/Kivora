@@ -119,15 +119,46 @@ export default function LandingLoginSection({
   };
 
   const handleQuickDemoLogin = async (demoEmail) => {
+    let timer = null;
     try {
       setLoading(true);
       clearMessages();
       authService.logout();
-      const data = await authService.login(demoEmail, 'Password123!');
+
+      // Show notice if network/cold-start takes more than 2 seconds
+      timer = setTimeout(() => {
+        setInfoMessage('Connecting to server... (If backend was on standby, waking up takes a few seconds)');
+      }, 2000);
+
+      const fallbackMap = {
+        'elena.rostova@kivora.demo': 'aanya@kivora.dev',
+        'aanya@kivora.dev': 'elena.rostova@kivora.demo',
+        'creative@luminaskincare.demo': 'lumina@kivora.dev',
+        'lumina@kivora.dev': 'creative@luminaskincare.demo',
+        'admin@kivora.demo': 'admin@kivora.dev',
+        'admin@kivora.dev': 'admin@kivora.demo',
+      };
+
+      let data;
+      try {
+        data = await authService.login(demoEmail, 'Password123!');
+      } catch (firstErr) {
+        const altEmail = fallbackMap[demoEmail];
+        if (altEmail) {
+          data = await authService.login(altEmail, 'Password123!');
+        } else {
+          throw firstErr;
+        }
+      }
+
+      clearTimeout(timer);
+      setInfoMessage(null);
       if (onAuthSuccess) onAuthSuccess(data);
     } catch (err) {
-      setError(err.message || 'Demo login failed');
+      if (timer) clearTimeout(timer);
+      setError(err.message || 'Demo login failed. Please ensure the backend server is running.');
     } finally {
+      if (timer) clearTimeout(timer);
       setLoading(false);
     }
   };

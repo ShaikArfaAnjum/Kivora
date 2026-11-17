@@ -154,13 +154,33 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     setIsLoading(true);
     setError(null);
     setOauthConfigInfo(null);
+
+    const fallbackMap = {
+      'elena.rostova@kivora.demo': 'aanya@kivora.dev',
+      'aanya@kivora.dev': 'elena.rostova@kivora.demo',
+      'creative@luminaskincare.demo': 'lumina@kivora.dev',
+      'lumina@kivora.dev': 'creative@luminaskincare.demo',
+      'admin@kivora.demo': 'admin@kivora.dev',
+      'admin@kivora.dev': 'admin@kivora.demo',
+    };
+
     try {
       authService.logout();
-      const data = await authService.login(demoEmail, 'Password123!');
+      let data;
+      try {
+        data = await authService.login(demoEmail, 'Password123!');
+      } catch (firstErr) {
+        const altEmail = fallbackMap[demoEmail];
+        if (altEmail) {
+          data = await authService.login(altEmail, 'Password123!');
+        } else {
+          throw firstErr;
+        }
+      }
       if (onAuthSuccess) onAuthSuccess(data);
       onClose();
     } catch (err) {
-      setError(err.message || 'Demo login failed.');
+      setError(err.message || 'Demo login failed. Please ensure the backend server is running.');
     } finally {
       setIsLoading(false);
     }
